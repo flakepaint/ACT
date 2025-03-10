@@ -1,0 +1,1043 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACT Writing Section Simulator - Practice Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        .fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            z-index: 9999;
+        }
+        .header {
+            background-color: #003b70;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            border-bottom: 1px solid #002a50;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .nav-button {
+            background-color: #002a50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .main-content {
+            display: flex;
+            height: calc(100vh - 40px);
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #e6e6e6;
+            padding: 15px;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .timer-container {
+            background-color: #003b70;
+            color: white;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .instructions {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .prompt {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        #essayInput {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            resize: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        button.primary-button {
+            background-color: #003b70;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button.primary-button:hover {
+            background-color: #002a50;
+        }
+        button.secondary-button {
+            background-color: #666;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .hidden {
+            display: none;
+        }
+        .time-warning {
+            color: #ff4d4d;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0.7; }
+        }
+        #wordCount {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: right;
+        }
+        .perspective {
+            background-color: #f8f8f8;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-left: 3px solid #003b70;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .question-number {
+            background-color: #003b70;
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        .lockdown-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            text-align: center;
+            max-width: 80%;
+        }
+        .question-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .question-bubble {
+            width: 30px;
+            height: 30px;
+            background-color: #e6e6e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .question-bubble.active {
+            background-color: #003b70;
+            color: white;
+        }
+        .completion-message {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tool-detection-warning {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #c62828;
+            text-align: center;
+            font-weight: bold;
+        }
+        .security-violation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(198, 40, 40, 0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 5px;
+            z-index: 10001;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .security-counter {
+            position: fixed;
+            top: 5px;
+            right: 50px;
+            background-color: rgba(255, 235, 238, 0.9);
+            color: #c62828;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="fullscreen-container" id="fullscreenContainer">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen">
+            <div class="header">
+                <h1>ACT® Writing Test Simulator</h1>
+                <div class="nav-buttons">
+                    <button class="nav-button" id="fullscreenButton">Enter Fullscreen</button>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="timer-container">
+                        <div class="timer">40:00</div>
+                    </div>
+                    <div class="question-list">
+                        <div class="question-bubble active">1</div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="question-number">Writing Test</div>
+                    <div class="instructions">
+                        <h2>Test Instructions</h2>
+                        <p>This is a simulation of the ACT Writing Test. You will have <strong>40 minutes</strong> to plan and write an essay in response to the prompt provided.</p>
+                        <p>The ACT Writing Test asks you to develop a perspective on an issue and analyze the relationship between your perspective and at least one other perspective.</p>
+                        <p><strong>You should:</strong></p>
+                        <ul>
+                            <li>Analyze and evaluate multiple perspectives on a complex issue</li>
+                            <li>State and develop your own perspective on the issue</li>
+                            <li>Explain the relationship between your perspective and those given</li>
+                            <li>Present your ideas clearly and logically</li>
+                            <li>Use specific examples and reasoning to support your argument</li>
+                        </ul>
+                        <p><strong>Security Notice:</strong> This simulator enforces test security measures similar to the actual ACT. Attempting to leave the test environment or access outside resources more than 5 times will result in test cancellation.</p>
+                        <p>When you're ready to begin, click the "Start Test" button below.</p>
+                    </div>
+                    <button id="startButton" class="primary-button">Start Test</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Test Screen -->
+        <div id="test-screen" class="hidden">
+            <div class="header">
+                <h1>ACT® Writing Test</h1>
+                <div class="nav-buttons">
+                    <div class="timer" id="timer">40:00</div>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="timer-container">
+                        <div class="timer" id="sidebarTimer">40:00</div>
+                    </div>
+                    <div class="question-list">
+                        <div class="question-bubble active">1</div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="question-number">Writing Prompt</div>
+                    <div class="prompt" id="promptContainer">
+                        <!-- Prompt content will be dynamically inserted here -->
+                    </div>
+                    
+                    <div id="wordCount">Word count: 0 (Characters: 0)</div>
+                    
+                    <textarea id="essayInput" placeholder="Write your essay here..."></textarea>
+                    
+                    <div class="button-container">
+                        <button id="submitButton" class="primary-button">Submit Essay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Completion Screen -->
+        <div id="completion-screen" class="hidden">
+            <div class="header">
+                <h1>ACT® Writing Test Simulator</h1>
+                <div class="nav-buttons">
+                    <button class="nav-button" id="exitFullscreenButton">Exit Fullscreen</button>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="timer-container">
+                        <div class="timer">00:00</div>
+                    </div>
+                    <div class="question-list">
+                        <div class="question-bubble active">1</div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="completion-message">
+                        <h2>Essay Completed!</h2>
+                        <p>Your essay has been saved. Thank you for completing the ACT Writing Test Simulator.</p>
+                    </div>
+                    
+                    <div class="prompt">
+                        <h2>Your Essay:</h2>
+                        <div id="finalEssay"></div>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button id="copyButton" class="secondary-button">Copy Essay</button>
+                        <button id="restartButton" class="primary-button">Start New Practice Test</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Lockdown message -->
+        <div id="lockdownMessage" class="lockdown-message hidden">
+            <h2>Test Security Notice</h2>
+            <p>Attempting to leave the test environment has been detected.</p>
+            <p>Please return to the test window. In a real ACT test, such actions could be flagged as potential violations.</p>
+            <p id="securityAttemptWarning">This is attempt <span id="attemptCount">1</span> of 5. Your test will be canceled after 5 attempts.</p>
+            <button id="returnToTestButton" class="primary-button">Return to Test</button>
+        </div>
+        
+        <!-- External tool detection warning -->
+        <div id="toolDetectionWarning" class="tool-detection-warning hidden">
+            <p>⚠️ Warning: Attempt to access external tools detected</p>
+            <p>Using external resources during the ACT test is not permitted.</p>
+        </div>
+
+
+        <!-- Security Violation Screen -->
+        <div id="securityViolationScreen" class="security-violation hidden">
+            <h2>TEST CANCELED</h2>
+            <p>You have attempted to leave the test environment 5 times.</p>
+            <p>Your test has been terminated due to security violations.</p>
+            <p>On the actual ACT exam, similar behavior could result in test cancellation, score invalidation, or other disciplinary actions.</p>
+            <button id="acknowledgeViolationButton" class="primary-button">Acknowledge and Return</button>
+        </div>
+
+
+        <!-- Security counter indicator -->
+        <div id="securityCounter" class="security-counter hidden">
+            Security violations: <span id="violationCount">0</span>/5
+        </div>
+    </div>
+
+
+    <script>
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const testScreen = document.getElementById('test-screen');
+        const completionScreen = document.getElementById('completion-screen');
+        const startButton = document.getElementById('startButton');
+        const submitButton = document.getElementById('submitButton');
+        const timerElement = document.getElementById('timer');
+        const sidebarTimerElement = document.getElementById('sidebarTimer');
+        const essayInput = document.getElementById('essayInput');
+        const wordCountElement = document.getElementById('wordCount');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const exitFullscreenButton = document.getElementById('exitFullscreenButton');
+        const fullscreenContainer = document.getElementById('fullscreenContainer');
+        const lockdownMessage = document.getElementById('lockdownMessage');
+        const returnToTestButton = document.getElementById('returnToTestButton');
+        const toolDetectionWarning = document.getElementById('toolDetectionWarning');
+        const copyButton = document.getElementById('copyButton');
+        const restartButton = document.getElementById('restartButton');
+        const finalEssay = document.getElementById('finalEssay');
+        const securityViolationScreen = document.getElementById('securityViolationScreen');
+        const acknowledgeViolationButton = document.getElementById('acknowledgeViolationButton');
+        const securityCounter = document.getElementById('securityCounter');
+        const attemptCountSpan = document.getElementById('attemptCount');
+        const violationCountSpan = document.getElementById('violationCount');
+        const promptContainer = document.getElementById('promptContainer');
+
+
+        // Timer variables
+        let timeLeft = 40 * 60; // 40 minutes in seconds
+        let timerInterval;
+        let typingTimer;
+        let isFullscreen = false;
+        let lockdownActive = false;
+        let visibilityCheck;
+        
+        // Security tracking
+        let securityViolations = 0;
+        const MAX_VIOLATIONS = 5;
+        
+        // Prompt tracking
+        let currentPromptId = null;
+        let usedPrompts = [];
+
+
+        // Define the 6 different prompts
+        const prompts = [
+            {
+                id: 1,
+                title: "Technology in Education",
+                intro: "As technology becomes increasingly integrated into classrooms, there is ongoing debate about its impact on student learning and educational outcomes. Some educators believe technology enhances education by providing personalized learning experiences and preparing students for a digital future. Others argue that technology can be distracting and may undermine traditional learning methods and teacher-student relationships.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Technology in the classroom is essential for preparing students for the modern workforce. Digital literacy is a critical skill, and students who are not exposed to educational technology will be at a significant disadvantage in their future careers."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "Over-reliance on technology diminishes crucial aspects of education such as critical thinking, face-to-face communication, and sustained attention. Schools should prioritize human connection and traditional learning methods over digital tools."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "Technology should be used strategically in education, with a balanced approach that incorporates digital tools when they enhance learning while preserving valuable aspects of traditional education. The key is thoughtful integration rather than wholesale adoption or rejection."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Global Citizenship",
+                intro: "In an increasingly interconnected world, there is debate about whether individuals should primarily identify as citizens of their own nation or as global citizens. Some argue that fostering a global identity creates more cooperation and understanding between cultures, while others believe that national identity remains essential for social cohesion and practical governance.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Identifying as a global citizen is crucial in addressing worldwide challenges like climate change, pandemics, and economic inequality. These issues transcend national borders and require collaborative global solutions and shared responsibility."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "Strong national identities are fundamental to democratic self-governance and cultural preservation. Citizens must primarily focus on their responsibilities to their own nations before attempting to solve global problems."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "People can and should maintain both national and global identities simultaneously. Healthy patriotism and global awareness are complementary, not contradictory, allowing individuals to appreciate their own culture while recognizing their place in the wider world."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Standardized Testing",
+                intro: "Standardized tests have long been a key component of educational assessment in the United States. Proponents argue that these tests provide objective measures of student achievement and school effectiveness. Critics contend that they narrow the curriculum, create unhealthy pressure, and fail to capture many important aspects of learning and student development.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Standardized tests are essential tools for educational accountability, providing clear metrics to identify strengths and weaknesses in students and schools. Without them, it would be impossible to make fair comparisons across different educational settings."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "Standardized testing has severely damaged education by forcing teachers to 'teach to the test' rather than fostering creativity, critical thinking, and love of learning. These tests reward memorization over deeper understanding and problem-solving abilities."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "While some standardized assessment is necessary, testing should be just one of many tools used to evaluate students. A balanced approach would include projects, portfolios, teacher observations, and other measures that capture the full range of student abilities and growth."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Social Media and Public Discourse",
+                intro: "Social media platforms have fundamentally changed how people communicate, share information, and engage in public discourse. Some view these platforms as democratizing forces that give voice to previously marginalized groups and facilitate important social movements. Others see them as having negative effects on public discourse by promoting misinformation, polarization, and superficial engagement with complex issues.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Social media has revolutionized public discourse by allowing anyone to participate regardless of status or resources. This democratization has enabled important social movements and given voice to perspectives that traditional media often overlooked."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "Social media algorithms promote divisive content that drives engagement but damages public discourse. These platforms have contributed to unprecedented polarization, the spread of misinformation, and the decline of nuanced discussion about complex social issues."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "The impact of social media depends entirely on how we choose to use and regulate these tools. With proper education, platform design, and community norms, social media can enhance rather than damage public discourse."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Arts Education",
+                intro: "As schools face budget constraints and increased pressure to perform well on standardized tests in core academic subjects, arts education programs often face cuts or reductions. This has sparked debate about the value and priority that should be given to arts education in schools.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Arts education is essential for developing creativity, emotional intelligence, and cultural understanding. These skills are increasingly important in today's economy and society, making arts education not a luxury but a necessity for well-rounded development."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "While arts have cultural value, schools must prioritize core academic subjects that provide foundational skills and knowledge needed for college and career readiness. Limited educational resources should be directed toward subjects with clear economic returns."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "The false dichotomy between arts and academics neglects how arts education enhances learning across all subjects. Arts integration can improve student engagement and achievement in math, science, and literacy while also developing creative capabilities."
+                    }
+                ]
+            },
+            {
+                id: 6,
+                title: "Mandatory Community Service",
+                intro: "Many high schools and colleges now require students to complete community service hours as a graduation requirement. Supporters argue that mandatory service instills civic responsibility and broadens students' perspectives. Critics contend that forcing students to volunteer contradicts the spirit of community service and may create resentment rather than genuine commitment to civic engagement.",
+                perspectives: [
+                    {
+                        title: "Perspective One",
+                        content: "Mandatory community service requirements provide valuable real-world experience and teach students about civic responsibility. Many students would never volunteer otherwise, and these programs expose them to important social issues and the rewards of helping others."
+                    },
+                    {
+                        title: "Perspective Two",
+                        content: "True community service must be voluntary to be meaningful. Requiring service as a graduation requirement creates resentment, encourages minimal effort, and undermines the authentic desire to contribute to one's community."
+                    },
+                    {
+                        title: "Perspective Three",
+                        content: "Schools should offer varied, meaningful service opportunities and strong incentives for participation without strict requirements. This approach encourages genuine engagement while recognizing that one-size-fits-all mandates may not serve all students or communities effectively."
+                    }
+                ]
+            }
+        ];
+
+
+        // Event listeners for fullscreen
+        fullscreenButton.addEventListener('click', enterFullscreen);
+        exitFullscreenButton.addEventListener('click', exitFullscreen);
+        
+        // Set up fullscreen change event listener
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        // Page visibility API to detect if user switches tabs
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // Detect keyboard shortcuts that might be used to navigate away
+        document.addEventListener('keydown', function(e) {
+            // Detect Alt+Tab, Ctrl+T, Ctrl+N, Ctrl+W
+            if ((e.altKey && e.keyCode === 9) || 
+                (e.ctrlKey && (e.keyCode === 84 || e.keyCode === 78 || e.keyCode === 87))) {
+                if (lockdownActive) {
+                    e.preventDefault();
+                    registerSecurityViolation();
+                }
+            }
+            
+            // Prevent F12 key (developer tools)
+            if (e.keyCode === 123) {
+                if (lockdownActive) {
+                    e.preventDefault();
+                    showToolDetectionWarning();
+                    registerSecurityViolation();
+                }
+            }
+        });
+        
+        // Disable right-click when in lockdown mode
+        document.addEventListener('contextmenu', function(e) {
+            if (lockdownActive) {
+                e.preventDefault();
+                showToolDetectionWarning();
+                registerSecurityViolation();
+            }
+        });
+        
+        // Function to select a prompt
+        function selectPrompt() {
+            // Initialize usedPrompts from localStorage if available
+            if (!usedPrompts.length && localStorage.getItem('actWritingUsedPrompts')) {
+                try {
+                    usedPrompts = JSON.parse(localStorage.getItem('actWritingUsedPrompts'));
+                } catch (e) {
+                    usedPrompts = [];
+                }
+            }
+            
+            // If all prompts have been used, clear the history
+            if (usedPrompts.length >= prompts.length) {
+                usedPrompts = [];
+            }
+            
+            // Filter out used prompts
+            const availablePrompts = prompts.filter(prompt => !usedPrompts.includes(prompt.id));
+            
+            // Select a random prompt from available ones
+            const selectedPrompt = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
+            
+            // If somehow no prompt is available, just pick the first one
+            const finalPrompt = selectedPrompt || prompts[0];
+            
+            // Mark this prompt as used
+            currentPromptId = finalPrompt.id;
+            if (!usedPrompts.includes(finalPrompt.id)) {
+                usedPrompts.push(finalPrompt.id);
+                // Save to localStorage
+                localStorage.setItem('actWritingUsedPrompts', JSON.stringify(usedPrompts));
+            }
+            
+            return finalPrompt;
+        }
+        
+        // Function to display the selected prompt
+        function displayPrompt(prompt) {
+            // Build the HTML for the prompt
+            let promptHTML = `
+                <h2>Prompt: ${prompt.title}</h2>
+                <p>${prompt.intro}</p>
+                
+                <p><strong>Read and carefully consider these perspectives. Each suggests a particular way of thinking about ${prompt.title.toLowerCase()}.</strong></p>
+            `;
+            
+            // Add perspectives
+            prompt.perspectives.forEach(perspective => {
+                promptHTML += `
+                    <div class="perspective">
+                        <p><strong>${perspective.title}:</strong> ${perspective.content}</p>
+                    </div>
+                `;
+            });
+            
+            // Add essay task
+            promptHTML += `
+                <p><strong>Essay Task:</strong> Write a unified, coherent essay about ${prompt.title.toLowerCase()} in which you:</p>
+                <ul>
+                    <li>analyze and evaluate the perspectives given</li>
+                    <li>state and develop your own perspective on the issue</li>
+                    <li>explain the relationship between your perspective and those given</li>
+                </ul>
+                <p>Your perspective may be in full agreement with any of the others, in partial agreement, or entirely different.</p>
+            `;
+            
+            // Set the HTML
+            promptContainer.innerHTML = promptHTML;
+            
+            // Update the title of test header
+            document.querySelector('.header h1').textContent = `ACT® Writing Test: ${prompt.title}`;
+        }
+        
+        // Start the test
+        startButton.addEventListener('click', function() {
+            // Select and display a prompt
+            const selectedPrompt = selectPrompt();
+            displayPrompt(selectedPrompt);
+            
+            welcomeScreen.classList.add('hidden');
+            testScreen.classList.remove('hidden');
+            startTimer();
+            essayInput.focus();
+            
+            // Reset security violations
+            securityViolations = 0;
+            updateViolationCounters();
+            
+            // Show the security counter
+            securityCounter.classList.remove('hidden');
+            
+            // If not already in fullscreen, request it again
+            if (!isFullscreen) {
+                enterFullscreen();
+            }
+            
+            // Activate lockdown mode
+            lockdownActive = true;
+        });
+
+
+        // Update word count as user types
+        essayInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(updateCounts, 300);
+        });
+        
+        // Submit the essay
+        submitButton.addEventListener('click', function() {
+            clearInterval(timerInterval);
+            const essayText = essayInput.value;
+            
+            // Show the essay on the completion screen
+            finalEssay.textContent = essayText;
+            
+            testScreen.classList.add('hidden');
+            completionScreen.classList.remove('hidden');
+            
+            // Deactivate lockdown mode
+            lockdownActive = false;
+            
+            // Hide security counter
+            securityCounter.classList.add('hidden');
+        });
+        
+        // Copy button functionality
+        copyButton.addEventListener('click', function() {
+            const essayText = finalEssay.textContent;
+            const promptTitle = document.querySelector('.header h1').textContent.replace('ACT® Writing Test: ', '');
+            let promptText = '';
+            
+            // Find the prompt that was used
+            const usedPrompt = prompts.find(p => p.id === currentPromptId);
+            if (usedPrompt) {
+                promptText = `${usedPrompt.title}\n\n${usedPrompt.intro}`;
+            }
+            
+            const fullCopyText = 
+`ACT Writing Test Practice Essay
+
+
+----- PROMPT -----
+${promptText}
+
+
+----- MY ESSAY -----
+${essayText}
+
+
+----- SCORING REQUEST -----
+Please score my essay on a scale of 1-12 for each of the four domains:
+1. Ideas and Analysis
+2. Development and Support
+3. Organization
+4. Language Use
+
+
+Then provide an overall score and specific feedback about strengths and areas for improvement.`;
+
+
+            navigator.clipboard.writeText(fullCopyText).then(function() {
+                alert('Essay copied to clipboard!');
+            }).catch(function(err) {
+                alert('Failed to copy essay to clipboard. Please select and copy the text manually.');
+                console.error('Could not copy text: ', err);
+            });
+        });
+        
+        // Restart the test
+        restartButton.addEventListener('click', function() {
+            // Reset timer
+            clearInterval(timerInterval);
+            timeLeft = 40 * 60;
+            timerElement.textContent = '40:00';
+            sidebarTimerElement.textContent = '40:00';
+            timerElement.classList.remove('time-warning');
+            sidebarTimerElement.classList.remove('time-warning');
+            
+            // Reset essay
+            essayInput.value = '';
+            updateCounts();
+            
+            // Reset security violations
+            securityViolations = 0;
+            updateViolationCounters();
+            
+ // Show the security counter
+            securityCounter.classList.remove('hidden');
+            
+            // If not already in fullscreen, request it again
+            if (!isFullscreen) {
+                enterFullscreen();
+            }
+            
+            // Activate lockdown mode
+            lockdownActive = true;
+        });
+
+
+        // Update word count as user types
+        essayInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(updateCounts, 300);
+        });
+        
+        // Submit the essay
+        submitButton.addEventListener('click', function() {
+            clearInterval(timerInterval);
+            const essayText = essayInput.value;
+            
+            // Show the essay on the completion screen
+            finalEssay.textContent = essayText;
+            
+            testScreen.classList.add('hidden');
+            completionScreen.classList.remove('hidden');
+            
+            // Deactivate lockdown mode
+            lockdownActive = false;
+            
+            // Hide security counter
+            securityCounter.classList.add('hidden');
+        });
+        
+        // Copy button functionality
+        copyButton.addEventListener('click', function() {
+            const essayText = finalEssay.textContent;
+            const promptText = document.querySelector('.prompt h2').textContent + "\n\n" + 
+                            document.querySelector('.prompt p').textContent;
+            
+            const fullCopyText = 
+`ACT Writing Test Practice Essay
+
+
+----- PROMPT -----
+${promptText}
+
+
+----- MY ESSAY -----
+${essayText}
+
+
+----- SCORING REQUEST -----
+Please score my essay on a scale of 1-12 for each of the four domains:
+1. Ideas and Analysis
+2. Development and Support
+3. Organization
+4. Language Use
+
+
+Then provide an overall score and specific feedback about strengths and areas for improvement.`;
+
+
+            navigator.clipboard.writeText(fullCopyText).then(function() {
+                alert('Essay copied to clipboard!');
+            }).catch(function(err) {
+                alert('Failed to copy essay to clipboard. Please select and copy the text manually.');
+                console.error('Could not copy text: ', err);
+            });
+        });
+        
+        // Restart the test
+        restartButton.addEventListener('click', function() {
+            // Reset timer
+            clearInterval(timerInterval);
+            timeLeft = 40 * 60;
+            timerElement.textContent = '40:00';
+            sidebarTimerElement.textContent = '40:00';
+            timerElement.classList.remove('time-warning');
+            sidebarTimerElement.classList.remove('time-warning');
+            
+            // Reset essay
+            essayInput.value = '';
+            updateCounts();
+            
+            // Reset security violations
+            securityViolations = 0;
+            updateViolationCounters();
+            
+            // Reset screens
+            completionScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        });
+        
+        // Acknowledge violation button
+        acknowledgeViolationButton.addEventListener('click', function() {
+            securityViolationScreen.classList.add('hidden');
+            completionScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            
+            // Reset security violations
+            securityViolations = 0;
+            updateViolationCounters();
+            
+            // Hide security counter
+            securityCounter.classList.add('hidden');
+            
+            // Deactivate lockdown
+            lockdownActive = false;
+        });
+        
+        // Function to handle entering fullscreen
+        function enterFullscreen() {
+            if (fullscreenContainer.requestFullscreen) {
+                fullscreenContainer.requestFullscreen();
+            } else if (fullscreenContainer.webkitRequestFullscreen) {
+                fullscreenContainer.webkitRequestFullscreen();
+            } else if (fullscreenContainer.mozRequestFullScreen) {
+                fullscreenContainer.mozRequestFullScreen();
+            } else if (fullscreenContainer.msRequestFullscreen) {
+                fullscreenContainer.msRequestFullscreen();
+            }
+        }
+        
+        // Function to handle exiting fullscreen
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+        
+        // Function to handle fullscreen change
+        function handleFullscreenChange() {
+            isFullscreen = !!document.fullscreenElement || 
+                         !!document.webkitFullscreenElement || 
+                         !!document.mozFullScreenElement || 
+                         !!document.msFullscreenElement;
+            
+            if (!isFullscreen && lockdownActive) {
+                registerSecurityViolation();
+            }
+        }
+        
+        // Function to handle visibility change (tab switching)
+        function handleVisibilityChange() {
+            if (document.hidden && lockdownActive) {
+                // Register violation when they switch away
+                registerSecurityViolation();
+            }
+        }
+        
+        // Function to show lockdown message
+        function showLockdownMessage() {
+            if (securityViolations >= MAX_VIOLATIONS) {
+                cancelTest();
+            } else {
+                lockdownMessage.classList.remove('hidden');
+                attemptCountSpan.textContent = securityViolations;
+            }
+        }
+        
+        // Function to hide lockdown message
+        returnToTestButton.addEventListener('click', function() {
+            lockdownMessage.classList.add('hidden');
+            if (!isFullscreen) {
+                enterFullscreen();
+            }
+        });
+        
+        // Function to register a security violation
+        function registerSecurityViolation() {
+            securityViolations++;
+            updateViolationCounters();
+            
+            if (securityViolations >= MAX_VIOLATIONS) {
+                cancelTest();
+            } else {
+                showLockdownMessage();
+            }
+        }
+        
+        // Function to update violation counters in the UI
+        function updateViolationCounters() {
+            violationCountSpan.textContent = securityViolations;
+            attemptCountSpan.textContent = securityViolations;
+        }
+        
+        // Function to cancel the test due to security violations
+        function cancelTest() {
+            // Stop the timer
+            clearInterval(timerInterval);
+            
+            // Hide other messages
+            lockdownMessage.classList.add('hidden');
+            toolDetectionWarning.classList.add('hidden');
+            
+            // Show violation screen
+            securityViolationScreen.classList.remove('hidden');
+            
+            // Hide test screen
+            testScreen.classList.add('hidden');
+            
+            // Deactivate lockdown
+            lockdownActive = false;
+        }
+        
+        // Function to show tool detection warning
+        function showToolDetectionWarning() {
+            toolDetectionWarning.classList.remove('hidden');
+            setTimeout(function() {
+                toolDetectionWarning.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Update word and character counts
+        function updateCounts() {
+            const text = essayInput.value;
+            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const charCount = text.length;
+            wordCountElement.textContent = `Word count: ${wordCount} (Characters: ${charCount})`;
+        }
+
+
+        // Timer function
+        function startTimer() {
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                // Format the time
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerElement.textContent = timeString;
+                sidebarTimerElement.textContent = timeString;
+                
+                // Add warning class when 5 minutes remaining
+                if (timeLeft <= 300) {
+                    timerElement.classList.add('time-warning');
+                    sidebarTimerElement.classList.add('time-warning');
+                }
+                
+                // Time's up
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Your essay will be submitted automatically.");
+                    submitButton.click();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
